@@ -1,50 +1,30 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { ShopContext } from "../../context/shop-context";
-import { CartItem } from "./cart-item";
-import { useNavigate } from "react-router-dom";
-
 import "./styles.css";
-import { useGetProducts } from "../../hooks/useGetProducts";
-import { IProduct } from "../../models/interfaces";
 
-export const CheckoutPage = () => {
-  const { getCartItemCount, getTotalCartAmount, checkout } =
+export const PurchasedItemsPage = () => {
+  const { purchasedItems, addToCart, getCartItemCount } =
     useContext(ShopContext);
-  const totalAmount = getTotalCartAmount();
-
-  const { products } = useGetProducts();
-
-  const navigate = useNavigate();
 
   return (
-    <div className="cart">
-      <div>
-        <h1>Your Cart Items</h1>
-      </div>
-      <div className="cart">
-        {products.map((product: IProduct) => {
-          if (getCartItemCount(product._id) !== 0) {
-            return <CartItem data={product} />;
-          }
+    <div className="purchased-items-page">
+      <h1> Previously Purchased Items Page </h1>
+
+      <div className="purchased-items">
+        {purchasedItems.map((item) => {
+          const cartItemCount = getCartItemCount(item._id);
+          return (
+            <div key={item._id} className="item">
+              <h3> {item.productName} </h3>
+              <img src={item.imageURL} alt={item.productName} />
+              <p> ${item.price} </p>
+              <button onClick={() => addToCart(item._id)}>
+                Purchase Again {cartItemCount > 0 && <> ({cartItemCount})</>}
+              </button>
+            </div>
+          );
         })}
       </div>
-
-      {totalAmount > 0 ? (
-        <div className="checkout">
-          <p> Subtotal: ${totalAmount} </p>
-          <button onClick={() => navigate("/")}> Continue Shopping </button>
-          <button
-            onClick={() => {
-              checkout(localStorage.getItem("userID"));
-            }}
-          >
-            {" "}
-            Checkout{" "}
-          </button>
-        </div>
-      ) : (
-        <h1> Your Shopping Cart is Empty</h1>
-      )}
     </div>
   );
 };
