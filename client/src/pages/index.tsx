@@ -1,29 +1,27 @@
-import { useContext } from "react";
-import { ShopContext } from "../../context/shop-context";
-import "./styles.css";
+import { useEffect, useState } from "react";
+import { useCookies } from "react-cookie";
+import { Navigate } from "react-router-dom";
+import axios from "axios";
+import { Product } from "./product";
 
-export const PurchasedItemsPage = () => {
-  const { purchasedItems, addToCart, getCartItemCount } =
-    useContext(ShopContext);
+import "./styles.css";
+import { useGetProducts } from "../../hooks/useGetProducts";
+
+export const ShopPage = () => {
+  const [cookies, _] = useCookies(["access_token"]);
+
+  const { products } = useGetProducts();
+
+  if (!cookies.access_token) {
+    return <Navigate to="/auth" />;
+  }
 
   return (
-    <div className="purchased-items-page">
-      <h1> Previously Purchased Items Page </h1>
-
-      <div className="purchased-items">
-        {purchasedItems.map((item) => {
-          const cartItemCount = getCartItemCount(item._id);
-          return (
-            <div key={item._id} className="item">
-              <h3> {item.productName} </h3>
-              <img src={item.imageURL} alt={item.productName} />
-              <p> ${item.price} </p>
-              <button onClick={() => addToCart(item._id)}>
-                Purchase Again {cartItemCount > 0 && <> ({cartItemCount})</>}
-              </button>
-            </div>
-          );
-        })}
+    <div className="shop">
+      <div className="products">
+        {products.map((product) => (
+          <Product product={product} />
+        ))}
       </div>
     </div>
   );
