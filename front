@@ -1,0 +1,309 @@
+src--components--Navbar.js---
+   --pages-------Admin.js , Contact.js , Details.js, Home.js , Login.js , Register,js
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Navbar.js
+import React from "react";
+import { Link } from "react-router-dom";
+import { useCookies } from "react-cookie";
+import { useNavigate } from "react-router-dom";
+
+export const Navbar = () => {
+  const [cookies, setCookies] = useCookies(["access_token"]);
+  const navigate = useNavigate();
+
+  const logout = () => {
+    setCookies("access_token", "");
+    window.localStorage.removeItem("userID");
+    navigate("/")
+  };
+
+  return (
+    <div className="navbar">
+      <div>
+        {!cookies.access_token ? (
+          <Link to="/login" style={{ margin: "40px", color: "red" }}>
+                       {/* IMP! */}
+          </Link>
+        ) : (
+          <>
+            <Link to="/home" style={{ margin: "40px", color: "red" }}>
+              Home
+            </Link>
+            <Link to="/contact" style={{ margin: "40px", color: "red" }}>
+              Contact
+            </Link>
+            <Link to="/admin" style={{ margin: "40px", color: "red" }}>
+              Admin
+            </Link>
+            <Link to="/details" style={{ margin: "40px", color: "red" }}>
+              Details
+            </Link>
+            <button onClick={logout}>Logout</button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Admin.js / Contact.js / Home.js / Details.js  
+import React from 'react'
+
+const Admin = () => {
+  return (
+    <div>Admin / Contact etc</div>
+  )
+}
+
+export default Admin   
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Login.js 
+import React,{useState} from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+
+  const [_, setCookies] = useCookies(["access_token"]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    try {
+      const result = await axios.post("http://localhost:200/auth/login", {
+        email,
+        password,
+      });
+      if (result.data.message == "dosne") {
+        alert("User Does Not Exists");
+        navigate("/");
+      }
+      if (result.data.message === "passwr") {
+        alert("Password Incorrect !");
+      }
+      if (result.data.message == "match") {
+        setCookies("access_token", result.data.token);
+        window.localStorage.setItem("userID", result.data.userID);
+        navigate("/home");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  return (
+    <div>
+      <h1>Please Register first</h1>
+      <form onSubmit={handleSubmit}>
+        {/* e m a i l  */}
+        <label style={{ display: "block" }} htmlFor="email">
+          E-mail
+        </label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+        />
+
+        {/* p a s s w o r d */}
+        <label style={{ display: "block" }} htmlFor="password">
+          Password
+        </label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+        />
+
+        <button type="submit">Submit !</button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Register.js
+import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useCookies } from "react-cookie";
+
+const Register = () => {
+  const [name, setName] = useState("");
+  const [sirName, setSirname] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [number, setNumber] = useState("");
+  
+  const navigate= useNavigate()
+
+  const [_, setCookies]= useCookies(["access_token"])
+
+  const handleSubmit= async(event)=>{
+    event.preventDefault()
+    try{
+        const result = await axios.post("http://localhost:200/auth/",{
+            name,
+            sirName,
+            password,
+            email,
+            number,
+        })
+        if (result.data.message=="exists"){
+            alert("User Exists")
+            navigate("/login")
+        }
+        if (result.data.message=="dosn"){
+            console.log(result.data)
+            setCookies("access_token",result.data.token)
+            window.localStorage.setItem("userID",result.data.userID)
+            navigate("/home")}
+        console.log(result.data,"thiss is thoehfds")
+    }catch (err){
+        console.error(err)
+    }
+  }
+  
+
+  return (
+    <div>
+      <h1>Please Register first</h1>
+      <form onSubmit={handleSubmit}>
+
+        {/* F I R S T   N A M E  */}
+        <label style={{ display: "block" }} htmlFor="name">
+          First Name
+        </label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(event) => {
+            setName(event.target.value);
+          }}
+        />
+
+        {/* S I R  N A M E */}
+        <label style={{ display: "block" }} htmlFor="sirname">
+          Last Name
+        </label>
+        <input
+          type="text"
+          id="sirname"
+          value={sirName}
+          onChange={(event) => {
+            setSirname(event.target.value);
+          }}
+        />
+
+        {/* p a s s w o r d */}
+        <label style={{ display: "block" }} htmlFor="password">
+          Password
+        </label>
+        <input
+          type="password"
+          id="password"
+          value={password}
+          onChange={(event) => {
+            setPassword(event.target.value);
+          }}
+        />
+
+
+        {/* e m a i l  */}
+        <label style={{ display: "block" }} htmlFor="email">
+          E-mail
+        </label>
+        <input
+          type="email"
+          id="email"
+          value={email}
+          onChange={(event) => {
+            setEmail(event.target.value);
+          }}
+        />
+
+        {/* n u m b e r  */}
+        <label style={{ display: "block" }} htmlFor="number">
+          Contact Number
+        </label>
+        <input
+          type="text"
+          id="number"
+          value={number}
+          onChange={(event) => {
+            setNumber(event.target.value);
+          }}
+        />
+         <button type="submit">Submit !</button>
+      </form>
+    </div>
+  );
+};
+
+export default Register;
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+App.js
+
+import './App.css';
+import { BrowserRouter as Router , Routes , Route } from 'react-router-dom';
+import { Navbar } from './components/Navbar';
+import Home from './pages/Home';
+import Details from './pages/Details';
+import Register from './pages/Register';
+import Login from './pages/Login';
+import Contact from './pages/Contact';
+import Admin from './pages/Admin';
+
+function App() {
+  return (
+    <div className="App">
+      <Router>
+        <Navbar/>
+        <Routes>
+          <Route path="/" element={<Register/>}/>
+          <Route path="/login" element={<Login/>}/>
+          <Route path="/home" element={<Home/>}/>
+          <Route path="/contact" element={<Contact/>}/>
+          <Route path="/admin" element={<Admin/>}/>
+          <Route path="/details" element={<Details/>}/>
+
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+
+export default App;
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Index.js
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+
+
+  
