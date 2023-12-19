@@ -305,5 +305,197 @@ root.render(
   </React.StrictMode>
 );
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+models-users.js
+routes-users.js
+index.js is also a file
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Users.js
+
+import mongoose from "mongoose";
+
+const UserSchema = new mongoose.Schema({
+    name:{type:String , required:true },
+    sirName:{type:String , required:true },
+    email:{type:String , required:true , unique:true},
+    password:{type:String , required:true },
+    number:{type:String , required:true },
+})
+
+export const UserModel = mongoose.model("users" , UserSchema)
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+users.js
+
+// import  express  from "express";
+// import { UserModel } from "../models/Users";
+
+
+// const router=express.Router()
+
+// router.post("/",async(req,res)=>{
+//     const {name, sirname, email , password , number}=req.body
+//     console.log(req.body)
+// })
+
+// export {router as userRouter}
+
+import express from "express"
+import  jwt  from "jsonwebtoken"
+import bcrypt from "bcrypt"
+import { UserModel } from "../models/Users.js" // T a k e   c a r e   o f   .js   i f   " i m p o r t "   u s e d 
+
+
+
+const router= express.Router()
+
+router.post("/",async(req,res)=>{
+    const {name, sirName, email , password , number} = req.body
+    let user =await UserModel.findOne({email})
+    // incase the user exists
+    if (user){
+        return res.json({message:"exists"})
+    }
+    
+    //if user not in DB
+
+    const hashedPassword= await bcrypt.hash(password,10)
+ 
+    user= await UserModel.create({
+       name,
+       sirName,
+       email,
+       password:hashedPassword,
+       number
+    })
+
+    const token= jwt.sign({_id:user._id},"skljfnkjdsf")
+
+    res.json({message:"dosn",token , userID:user._id })    
+
+    // console.log(req.body)
+    // res.status(200).json({message:"Data Sent"})
+    
+
+    // if (user){
+    //     return res.status(200).json({message:"User already exists"})
+    // }
+    
+      
+
+
+});
+
+router.post("/login",async(req,res)=>{
+    const {email , password } = req.body
+    let user =await UserModel.findOne({email})
+    // incase the user exists
+    if (!user){
+        return res.json({message:"dosne"})
+    }
+    const isMatch = await bcrypt.compare(password,user.password)
+
+    if (!isMatch){
+        return res.json({message:"passwr"})
+    }
+
+    const token= jwt.sign({_id:user._id},"skljfnkjdsf")
+
+    res.json({message:"match",token , userID:user._id })    
 
   
+      
+
+
+});
+
+export {router as userRouter}
+
+
+// import express from "express";
+// import jwt from "jsonwebtoken"
+// import bcrypt from "bcrypt"
+// import { UserModel } from "../models/Users.js";
+
+// const router =express.Router()
+
+// router.post("/register",async(req,res)=>{
+//     const {username , password} = req.body
+//     const user = await UserModel.findOne({username}) // username:username
+
+//     if (user){
+//       return res.json({message:"User already exists."})
+//     }
+//     const hashedPassword = await bcrypt.hash(password , 10)
+//     const newUser = new UserModel({username , password:hashedPassword})// ( { username : username , password : "hashedPassword" } )
+//     await newUser.save() // saving the changes   
+
+//     res.json({message:"User Registered Successfully!"})
+// })
+
+// router.post("/login",async (req,res)=>{                                                                                                                                                                                                                                                                                       // after login the user needs to send the token to prove that they re the original users who sent request
+//     const {username , password} = req.body
+//     const user = await UserModel.findOne({username})
+
+//     if(!user){
+//         return res.json({message:"User Dosen't Exist"})
+//     }
+
+//     const isPasswordValid = await bcrypt.compare(password , user.password)
+    
+//     if (!isPasswordValid){
+//         return res.json({message:"Username or Password is Incorrect"})
+//     }
+
+//     const token = jwt.sign({id:user._id}, "secret") // id of the user , with "secret" key
+//     res.json( { token , userID : user._id } )
+// })    
+
+// export {router as userRouter}
+
+// export const verifyToken = (req,res,next) =>{
+//     const token = req.headers.authorization
+//     if (token){
+//         jwt.verify(token,"secret",(err)=>{
+//             if (err) return res.sendStatus(403)
+//             next()
+//         })
+//     } else {
+//         res.sendStatus(401)
+//     }
+// }
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+index.js
+
+
+ 
+import express from "express";
+import path from "path";
+import mongoose from "mongoose";
+import cors from "cors"
+
+import { userRouter } from "./routes/users.js";
+
+const app=express()
+
+app.use(express.json())
+app.use(cors())
+ 
+app.use("/auth",userRouter)
+
+mongoose.connect("mongodb://127.0.0.1:27017",{
+    dbName:"fullapp99"
+}).then ( () => { console.log( "Database Connected !" ) } ).catch( ( e ) => { console.log(e) } )                    // PROMISE RETURN KAREGA
+
+ 
+
+app.listen(200, () => {console.log("SERVER STARTER");});
+ 
+   
+    
+   
+
